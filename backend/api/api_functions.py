@@ -1,70 +1,76 @@
+from typing import Dict, List, Optional
+
 import requests
 
 
-def get_access_token(client_id, client_secret):
+def get_access_token(client_id: str, client_secret: str) -> Optional[str]:
+    """
+    Obtains a Spotify Client Credentials access token.
+    Returns the token string on success or None on failure.
+    """
     TOKEN_URL = "https://accounts.spotify.com/api/token"
-
-    data = {
-        "grant_type": "client_credentials",
-        "client_id": client_id,
-        "client_secret": client_secret,
-    }
-
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-    response = requests.post(TOKEN_URL, data=data, headers=headers)
-
-    # se status=ok -- retorna o token
-    if response.status_code == 200:
-        access_token = response.json()
-
-        return access_token
-
-    # caso contrário -- não retorna nada
-    return None
+    try:
+        resp = requests.post(
+            TOKEN_URL,
+            data={"grant_type": "client_credentials"},
+            auth=(client_id, client_secret),
+            timeout=10,
+        )
+        resp.raise_for_status()
+        body = resp.json()
+        return body.get("access_token")
+    except Exception as exc:
+        # Simple logging for development. In production use structured logging.
+        print("[api_functions.get_access_token] error:", exc)
+        return None
 
 
-def get_artist_name_by_id(artist_id, access_token):
-    artist_url = f"https://api.spotify.com/v1/artists/{artist_id}"
+def search_for_tracks(
+    track_alias: str, access_token: Optional[str], limit: int = 5, offset: int = 0
+) -> List[Dict]:
+    """
+    Search tracks on Spotify and return a simplified list of tracks.
 
-    headers = {"Authorization": f"Bearer  {access_token}"}
+    - If `access_token` is falsy, returns [].
+    - Uses the Spotify Search API and returns a list of dicts with keys:
+      id, name, artist, image, preview, spotifyUrl
+    """
+    if not access_token:
+        return []
 
-    response = requests.get(artist_url, headers=headers)
-
-    # se status=ok -- retorna o nome do artista
-    if response.status_code == 200:
-        artist_name = response.json().get("name")
-
-        return artist_name
-
-    # caso contrário -- retorna o Erro
-    return f"Erro: {response.text}"
-
-
-def search_for_tracks(track_alias, access_token, limit=5, offset=0):
-    search_url = f"https://api.spotify.com/v1/search"
-
+    url = "https://api.spotify.com/v1/search"
     headers = {"Authorization": f"Bearer {access_token}"}
-
+    # Use `track:...` to prioritize track name search while allowing the caller to pass any raw query.
     params = {
         "q": f"track:{track_alias}",
         "type": "track",
-        "limit": f"{limit}",
-        "offset": f"{offset}",
+        "limit": str(limit),
+        "offset": str(offset),
     }
 
-    response = requests.get(search_url, params=params, headers=headers)
+    try:
+        resp = requests.get(url, headers=headers, params=params, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        print("[api_functions.search_for_tracks] request error:", exc)
+        return []
 
-    # se satus=ok -- retorna um dicionario de sugestões
-    if response.status_code == 200:
-        track_suggestions = response.json()
+    items = data.get("tracks", {}).get("items", [])
+    simplified: List[Dict] = []
 
-        return track_suggestions.get("tracks", {}).get("items", [])
+    for item in items:
+        simplified.append(
+            {
+                "id": item.get("id"),
+                "name": item.get("name"),
+                "artist": ", ".join(
+                    a.get("name") for a in item.get("artists", []) if a.get("name")
+                ),
+                "image": (item.get("album", {}).get("images") or [{}])[0].get("url"),
+                "preview": item.get("preview_url"),
+                "spotifyUrl": item.get("external_urls", {}).get("spotify"),
+            }
+        )
 
-    # caso contrário -- retorna o Erro
-    return f"Erro: {response.text}"
-
-
-# fazer a função pra quando o usuário escolher uma das sugestões ele pegar o id
-#  do artista pelo nome
-# def get_artist_id_by_name(artist_name, access_token):
+    return simplified
