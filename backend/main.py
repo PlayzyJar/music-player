@@ -4,25 +4,34 @@ from contextlib import asynccontextmanager
 from typing import Union
 
 import requests
-from api.api_functions import get_access_token, search_for_tracks
+from api.osu_rest import lookup_osu_beatmap
+from api.spotify_rest import get_access_token, search_for_tracks
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from ossapi import Ossapi
+from requests.models import LocationParseError
 
 load_dotenv()
 
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+
+OSU_CLIENT_ID = os.getenv("OSU_CLIENT_ID")
+OSU_CLIENT_SECRET = os.getenv("OSU_CLIENT_SECRET")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Tenta adquirir token inicial
-    token = get_access_token(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
-    app.state.spotify_token = token
+    spotify_token = get_access_token(
+        client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET
+    )
+    app.state.spotify_token = spotify_token
+    app.state.osu_api = Ossapi(OSU_CLIENT_ID, OSU_CLIENT_SECRET)
 
-    if token:
-        print("token adquirido com sucesso! (len={})".format(len(token)))
+    if spotify_token:
+        print(f"tokens adquiridos com sucesso! (spotify_len={len(spotify_token)})")
     else:
         print(
             "Falha ao adquirir token durante startup. Verifique CLIENT_ID/CLIENT_SECRET e conectividade."
@@ -62,9 +71,10 @@ async def refresh_token(app: FastAPI):
 
             try:
                 new_token = get_access_token(
-                    client_id=CLIENT_ID, client_secret=CLIENT_SECRET
+                    client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET
                 )
                 app.state.spotify_token = new_token
+
                 if new_token:
                     print("spotify token renovado! (len={})".format(len(new_token)))
                 else:
@@ -96,12 +106,13 @@ def get_token(request: Request):
     Rota simples de debugging: informa se existe token e um preview (não expõe token completo).
     Em produção, remova ou proteja essa rota.
     """
-    token = request.app.state.spotify_token
-    if isinstance(token, str) and token:
-        preview = token[:10] + "..." if len(token) > 10 else token
+    spotify_token = request.app.state.spotify_token
+
+    if isinstance(spotify_token, str) and spotify_token:
+        preview = spotify_token[:10] + "..." if len(spotify_token) > 10 else spotify_token
     else:
         preview = None
-    return {"token_present": bool(token), "token_preview": preview}
+    return {"token_present": bool(spotify_token), "token_preview": preview}
 
 
 @app.get("/search")
@@ -119,4 +130,15 @@ def search_musics(q: str):
     print(
         f"/search chamado q={q!r} usando token len={len(access_token) if isinstance(access_token, str) else 'NA'}"
     )
+
     return search_for_tracks(track_alias=q, access_token=access_token)
+
+
+# @app.get("/osu_beatmap")
+# def lookup_beatmap(query: str):
+#     """
+#     Endpoint de busca de beatmaps do osu!.
+#     """
+#     return lookup_osu_beatmap(query="invincible", api=app.state.osu_api)
+
+# resultados = lookup_osu_beatmap(query="invincible", api=app.state.osu_api)
