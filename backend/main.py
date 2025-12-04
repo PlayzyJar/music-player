@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from typing import Union
 
 import requests
-from api.osu_rest import get_osu_access_token, search_osu_beatmap
+from api.osu_rest import get_osu_access_token, search_osu_beatmaps
 from api.spotify_rest import get_spotify_access_token, search_for_tracks
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -227,11 +227,21 @@ def search_musics(q: str):
     return search_for_tracks(track_alias=q, access_token=access_token)
 
 
-# @app.get("/osu_beatmap")
-# def lookup_beatmap(query: str):
-#     """
-#     Endpoint de busca de beatmaps do osu!.
-#     """
-#     return lookup_osu_beatmap(query="invincible", api=app.state.osu_api)
+@app.get("/osu_beatmaps")
+def search_beatmaps(q: str):
+    """
+    Endpoint de busca de beatmaps do osu!.
+    """
 
-# resultados = lookup_osu_beatmap(query="invincible", api=app.state.osu_api)
+    access_token = app.state.osu_token
+
+    if not access_token:
+        print(f"/search chamado sem token válido. q={q!r}")
+        # retorna array vazio (mesmo comportamento anterior), mas com log claro
+        return []
+
+    print(
+        f"/search chamado q={q!r} usando token len={len(access_token) if isinstance(access_token, str) else 'NA'}"
+    )
+
+    return search_osu_beatmaps(q=q, access_token=access_token)

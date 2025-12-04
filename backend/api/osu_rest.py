@@ -3,20 +3,12 @@ from typing import Dict, List, Optional
 
 import requests
 from dotenv import load_dotenv
-from ossapi import Ossapi
 
 load_dotenv()
 
 OSU_CLIENT_ID = os.getenv("OSU_CLIENT_ID")
 OSU_CLIENT_SECRET = os.getenv("OSU_CLIENT_SECRET")
 
-# create a new client at https://osu.ppy.sh/home/account/edit#oauth
-api = Ossapi(OSU_CLIENT_ID, OSU_CLIENT_SECRET)
-
-# see docs for full list of endpoints
-print(api.user("PlayzyART").id)
-print(api.user(29214575, mode="osu").username)
-print(api.beatmap(221777).id)
 
 def get_osu_access_token(client_id: str, client_secret: str) -> Optional[str]:
     """
@@ -31,15 +23,15 @@ def get_osu_access_token(client_id: str, client_secret: str) -> Optional[str]:
             TOKEN_URL,
             headers={
                 "Accept": "application/json",
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/x-www-form-urlencoded",
             },
             data={
                 "scope": "public",
                 "grant_type": "client_credentials",
                 "client_id": client_id,
-                "client_secret": client_secret
+                "client_secret": client_secret,
             },
-            timeout=10
+            timeout=10,
         )
 
         resp.raise_for_status()
@@ -54,13 +46,55 @@ def get_osu_access_token(client_id: str, client_secret: str) -> Optional[str]:
         return None
 
 
-def search_osu_beatmap(query: str, api: Ossapi) -> List[Dict]:
+def search_osu_beatmaps(
+    q: str, access_token: Optional[str], limit: int = 5
+) -> List[Dict]:
     """
-    Endpoint de busca de beatmaps do osu!.
+    Search beatmaps on osu!and return a simplified list of tracks.
+
+    - If `access_token` is false, returns [].
+    - Uses the beatmapsets search API and returns a list of dicts with keys:
+      id, title, artist, image, preview, spotifyUrl
     """
+    if not access_token:
+        return []
 
-    results = set(api.search_beatmapsets(query=query, mode=0))
+    url = "https://osu.ppy.sh/api/v2/beatmapsets/search"
 
-    print(results)
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": f"Bearer {access_token}",
+    }
 
-    return api.search_beatmapsets(query=query, mode=0)
+    params = {"q": q}
+
+    try:
+        resp = requests.get(url, headers=headers, params=params, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        print("[api_functions.search_osu_beatmaps] request error:", exc)
+        return []
+
+    beatmaps = data["beatmapsets"]
+
+    simplified_beatmaps: List[Dict] = []
+
+    for beatmap in beatmaps:
+        simplified_beatmaps.append(
+            {
+                "title": beatmap["title"],
+                "artist": beatmap["artist"],
+                "creator": beatmap["creator"],
+                "play_count": beatmap["play_count"],
+                "image": beatmap["covers"]["list"],
+                "last_updated": beatmap["last_updated"],
+                "preview_url": beatmap["preview_url"],
+            }
+        )
+
+        if len(simplified_beatmaps) >= limit:
+            break
+
+    return simplified_beatmaps
