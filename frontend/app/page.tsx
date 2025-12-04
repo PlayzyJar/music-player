@@ -101,16 +101,18 @@ export default function HomePage(): JSX.Element {
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  if (track.spotifyUrl) {
-                    // abre no Spotify em nova aba
-                    window.open(track.spotifyUrl, "_blank", "noopener");
-                  }
+                  // redireciona para a rota de beatmaps passando title e artist como query params
+                  const title = track.name ?? "";
+                  const artist = track.artist ?? "";
+                  const q = `?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`;
+                  window.location.href = `/osu_beatmaps${q}`;
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    if (track.spotifyUrl) {
-                      window.open(track.spotifyUrl, "_blank", "noopener");
-                    }
+                    const title = track.name ?? "";
+                    const artist = track.artist ?? "";
+                    const q = `?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`;
+                    window.location.href = `/osu_beatmaps${q}`;
                   }
                 }}
               >
