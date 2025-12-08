@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+import "./globals.css";
+
 import OsuLogo from "../public/osu_logo.png";
 
 type Track = {
@@ -80,7 +82,7 @@ export default function HomePage(): JSX.Element {
   }, [query]);
 
   return (
-    <div className="justify-center flex flex-col gap-4 items-center w-screen h-screen text-slate-200 py-4">
+    <div className="font-torus justify-center flex flex-col gap-4 items-center w-screen h-screen text-slate-200 py-4">
       {/*barra de pesquisa*/}
       <input
         placeholder="O que você quer tocar?"
@@ -92,10 +94,10 @@ export default function HomePage(): JSX.Element {
       <div className="w-3/8 h-9/10 rounded-md flex flex-col justify-start items-start bg-zinc-900">
         {/*resultados*/}
         {results.length > 0 && (
-          <div className="w-full px-4 py-4 h-full flex flex-col justify-center items-center gap-2">
+          <div className="w-full px-4 py-4 h-full flex flex-col justify-start items-center gap-1">
+            <h1 className="py-2 px-2 font-semibold w-full text-4xl">Músicas</h1>
             {results.slice(0, 5).map((track, i) => (
               <div
-                type="button"
                 key={track.id ?? i}
                 className="group relative hover:bg-zinc-800 transition ease-in-out duration-300 hover:scale-102 px-2 w-full h-25 rounded-md grid grid-cols-6 grid-rows-2 gap-2 justify-end items-center bg-zinc-900 text-zinc-100"
               >
@@ -128,7 +130,7 @@ export default function HomePage(): JSX.Element {
                   "
                   >
                     <Image
-                      className="transition ease-in-out duration-200 group-hover:scale-102"
+                      className="transition hover:scale-115 focus:scale-98 ease-in-out duration-200 group-hover:scale-102"
                       src={OsuLogo}
                       alt="osu"
                       width={50}
@@ -137,11 +139,11 @@ export default function HomePage(): JSX.Element {
                   </button>
                 </div>
 
-                <div className="text-xl font-semibold truncate text-overflow-ellipsis row-1 justify-start items-start col-start-2 col-end-7">
+                <div className="font-torus font-semibold flex text-xl truncate text-overflow-ellipsis row-1 justify-start items-end col-start-2 col-end-7 w-full h-full mx-2">
                   {track.name}
                 </div>
 
-                <div className="text-sm truncate text-overflow-ellipsis row-2 justify-start items-end col-start-2 col-end-7">
+                <div className="font-torus flex text-sm truncate text-overflow-ellipsis row-2 justify-start items-start col-start-2 col-end-7 w-full h-full mx-2">
                   {track.artist}
                 </div>
               </div>

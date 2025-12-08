@@ -82,18 +82,18 @@ def search_osu_beatmaps(
     simplified_beatmaps: List[Dict] = []
 
     for beatmap in beatmaps:
-        if artist.lower().strip() == beatmap["artist"].lower().strip():
-            simplified_beatmaps.append(
-                {
-                    "title": beatmap["title"],
-                    "artist": beatmap["artist"],
-                    "creator": beatmap["creator"],
-                    "play_count": beatmap["play_count"],
-                    "image": beatmap["covers"]["list"],
-                    "last_updated": beatmap["last_updated"],
-                    "preview_url": beatmap["preview_url"],
-                }
-            )
+        simplified_beatmaps.append(
+            {
+                "download_url": f"https://osu.ppy.sh/beatmapsets/{beatmap['beatmaps'][0]['beatmapset_id']}/download",
+                "title": beatmap["title"],
+                "artist": beatmap["artist"],
+                "creator": beatmap["creator"],
+                "play_count": beatmap["play_count"],
+                "image": beatmap["covers"]["list"],
+                "last_updated": beatmap["last_updated"],
+                "preview_url": beatmap["preview_url"],
+            }
+        )
 
         if len(simplified_beatmaps) >= limit:
             break

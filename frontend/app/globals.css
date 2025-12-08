@@ -17,3 +17,55 @@
     }
 }
 
+/*fontes personalidas do osu*/
+@theme {
+    --font-torus: "torus", sans-serif;
+}
+
+@font-face {
+    font-family: "torus";
+    src: url("/fonts/torus/Torus-Bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "torus";
+    src: url("/fonts/torus/Torus-Heavy.otf") format("opentype");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "torus";
+    src: url("/fonts/torus/Torus-Light.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "torus";
+    src: url("/fonts/torus/Torus-Regular.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "torus";
+    src: url("/fonts/torus/Torus-SemiBold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "torus";
+    src: url("/fonts/torus/Torus-Thin.otf") format("opentype");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}

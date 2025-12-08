@@ -236,7 +236,7 @@ def search_beatmaps(track: str, artist: str):
     access_token = app.state.osu_token
 
     if not access_token:
-        print(f"/search chamado sem token válido. q={q!r}")
+        print(f"/search chamado sem token válido. q={track!r}")
         # retorna array vazio (mesmo comportamento anterior), mas com log claro
         return []
 
@@ -245,4 +245,3 @@ def search_beatmaps(track: str, artist: str):
     )
 
     return search_osu_beatmaps(track=track, artist=artist, access_token=access_token)
-
