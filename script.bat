@@ -4,13 +4,10 @@ REM .\script.bat na raíz do projeto para iniciar a aplicação
 REM =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 @echo off
-setlocal
+cd /d"%~dp0"
 
-set BACKEND_PATH=backend\
-set FRONTEND_PATH=frontend\
+cd backend
+start /b cmd /c "call venv\Scripts\activate && uvicorn main:app --reload"
 
-start cmd /k "cd backend && venv\Scripts\activate.bat && uvicorn main:app --reload"
-
-start cmd /k "cd frontend && npm run dev"
-
-pause
+cd ../frontend
+npm run dev
