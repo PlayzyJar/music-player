@@ -91,9 +91,10 @@ export default function HomePage(): JSX.Element {
       ></input>
 
       {/*área principal*/}
-      <div className="w-3/8 h-9/10 rounded-md flex flex-col justify-start items-start bg-zinc-900">
-        {/*resultados*/}
-        {results.length > 0 && (
+
+      {/*resultados*/}
+      {results.length > 0 && (
+        <div className="w-3/8 h-9/10 rounded-md flex flex-col justify-start items-start bg-zinc-900">
           <div className="w-full px-4 py-4 h-full flex flex-col justify-start items-center gap-1">
             <h1 className="py-2 px-2 font-semibold w-full text-4xl">Músicas</h1>
             {results.slice(0, 5).map((track, i) => (
@@ -149,8 +150,8 @@ export default function HomePage(): JSX.Element {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

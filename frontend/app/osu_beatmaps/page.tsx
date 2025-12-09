@@ -78,11 +78,14 @@ export default function Beatmaps() {
   return (
     <div className="font-torus justify-center flex flex-col gap-4 items-center w-screen h-screen text-slate-200 py-4">
       {/*área principal*/}
-      <div className="w-3/8 h-9/10 rounded-md flex flex-col justify-start items-start bg-zinc-900">
-        {/*resultados*/}
-        {beatmaps.length > 0 && (
+
+      {/*resultados*/}
+      {beatmaps.length > 0 && (
+        <div className="w-3/8 h-9/10 rounded-md flex flex-col justify-start items-start bg-zinc-900">
           <div className="w-full px-4 py-4 h-full flex flex-col justify-center items-center gap-2">
-            <h1 className="py-2 px-2 font-semibold w-full text-4xl">Beatmaps</h1>
+            <h1 className="py-2 px-2 font-semibold w-full text-4xl">
+              Beatmaps
+            </h1>
             {beatmaps.slice(0, 5).map((beatmap, i) => (
               <div
                 type="button"
@@ -159,8 +162,8 @@ export default function Beatmaps() {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
